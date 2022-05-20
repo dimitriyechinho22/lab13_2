@@ -273,9 +273,9 @@ class LinkedBST(AbstractCollection):
         :return:
         :rtype:
         """
-        for num in list(self.inorder())[::-1]:
-            if num < item:
-                return num
+        for number in list(self.inorder())[::-1]:
+            if number < item:
+                return number
         return None
     def demo_bst(self, path):
         """
