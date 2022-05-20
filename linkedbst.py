@@ -285,13 +285,3 @@ class LinkedBST(AbstractCollection):
         :return:
         :rtype:
         """
-if __name__ == '__main__':
-    lbst = LinkedBST()
-    lbst.add(4)
-    lbst.add(2)
-    lbst.add(6)
-    lbst.add(1)
-    lbst.add(3)
-    lbst.add(5)
-    lbst.add(7)
-    print(lbst)
