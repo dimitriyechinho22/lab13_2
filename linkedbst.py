@@ -2,12 +2,15 @@
 File: linkedbst.py
 Author: Ken Lambert
 """
-
 from abstractcollection import AbstractCollection
 from bstnode import BSTNode
 from linkedstack import LinkedStack
 from linkedqueue import LinkedQueue
 from math import log
+import random
+import time
+
+
 
 
 class LinkedBST(AbstractCollection):
@@ -45,7 +48,8 @@ class LinkedBST(AbstractCollection):
     def preorder(self):
         """Supports a preorder traversal on a view of self."""
         return None
-    def inorder(self):
+
+    def inorder1(self):
         """Supports an inorder traversal on a view of self."""
         lyst = list()
 
@@ -54,8 +58,25 @@ class LinkedBST(AbstractCollection):
                 recurse(node.left)
                 lyst.append(node.data)
                 recurse(node.right)
+
         recurse(self._root)
         return iter(lyst)
+
+    def inorder(self):
+        """Supports an inorder traversal on a view of self."""
+        lyst = []
+        stack = LinkedStack()
+        current = self._root
+        while not stack.isEmpty() or current != None:
+            if current is None:
+                current = stack.pop()
+                lyst.append(current.data)
+                current = current.right
+            else:
+                stack.push(current)
+                current = current.left
+        res = list(iter(lyst))
+        return res
     def postorder(self):
         """Supports a postorder traversal on a view of self."""
         return None
@@ -68,17 +89,10 @@ class LinkedBST(AbstractCollection):
     def find(self, item):
         """If item matches an item in self, returns the
         matched item, or None otherwise."""
-        def recurse(node):
-            if node is None:
-                return None
-            elif item == node.data:
-                return node.data
-            elif item < node.data:
-                return recurse(node.left)
-            else:
-                return recurse(node.right)
-        return recurse(self._root)
-    # Mutator methods
+        for i in list(self.inorder()):
+            if item == i:
+                return item
+        return None
     def clear(self):
         """Makes self become empty."""
         self._root = None
@@ -86,27 +100,25 @@ class LinkedBST(AbstractCollection):
     def add(self, item):
         """Adds item to the tree."""
         # Helper function to search for item's position
-        def recurse(node):
             # New item is less, go left until spot is found
-            if item < node.data:
-                if node.left == None:
-                    node.left = BSTNode(item)
-                else:
-                    recurse(node.left)
-            # New item is greater or equal,
-            # go right until spot is found
-            elif node.right == None:
-                node.right = BSTNode(item)
-            else:
-                recurse(node.right)
-                # End of recurse
-        # Tree is empty, so new item goes at the root
         if self.isEmpty():
             self._root = BSTNode(item)
-        # Otherwise, search for the item's spot
         else:
-            recurse(self._root)
-        self._size += 1
+            current = self._root
+            while True:
+                if item < current.data:
+                    if current.left is None:
+                        current.left = BSTNode(item)
+                        break
+                    else:
+                        current = current.left
+                elif current.right is None:
+                    current.right = BSTNode(item)
+                    break
+                else:
+                    current = current.right
+        self._size+=1
+
     def remove(self, item):
         """Precondition: item is in self.
         Raises: KeyError if item is not in self.
@@ -273,9 +285,9 @@ class LinkedBST(AbstractCollection):
         :return:
         :rtype:
         """
-        for number in list(self.inorder())[::-1]:
-            if number < item:
-                return number
+        for num in list(self.inorder())[::-1]:
+            if num < item:
+                return num
         return None
     def demo_bst(self, path):
         """
@@ -285,3 +297,39 @@ class LinkedBST(AbstractCollection):
         :return:
         :rtype:
         """
+        with open(path) as file:
+            dictionary = [i.strip() for i in file.readlines()]
+            random_lst = dictionary[:1000]
+            random.shuffle(random_lst)
+        start_time = time.time()
+        for elements in random_lst:
+            if elements in dictionary:
+                continue
+            else:
+                break
+        print('The time running with the list: --->', time.time() - start_time, 'seconds')
+        print('*'*1000)
+        my_tree = LinkedBST()
+        for elem in dictionary[:10000]:
+            my_tree.add(elem)
+        start_time1 = time.time()
+        for item in random_lst:
+            my_tree.find(item)
+        print('Time when running with binary structured tree: ---> ', time.time() - start_time1, 'seconds')
+        print('*'*1000)
+        random.shuffle(dictionary)
+        my_tree_new = LinkedBST()
+        for elem in dictionary[:10000]:
+            my_tree_new.add(elem)
+        start_time2 = time.time()
+        for item in random_lst:
+            my_tree_new.find(item)
+        print('Time of searching when adding random words: ---> ', time.time() - start_time2, 'seconds')
+        print('*'*1000)
+        my_tree_new.rebalance()
+        for elem in dictionary[:10000]:
+            my_tree_new.add(elem)
+        start_time3 = time.time()
+        for item in random_lst:
+            my_tree_new.find(item)
+        print('Time running after rebalancing: --->', time.time() - start_time3, 'seconds')
